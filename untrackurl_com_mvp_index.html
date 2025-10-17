@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>UntrackURL — Bulk remove tracking parameters from URLs</title>
+  <meta name="description" content="Paste thousands of URLs and strip tracking parameters like utm_*, gclid, fbclid, mc_eid, and more. Fast, private, and client‑side." />
+  <link rel="canonical" href="https://untrackurl.com/" />
+  <meta property="og:title" content="UntrackURL — Bulk URL tracker remover" />
+  <meta property="og:description" content="Clean lists of URLs. Remove UTM, fbclid, gclid, and more. Fully client‑side." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://untrackurl.com/" />
+  <meta name="robots" content="index,follow" />
+  <style>
+    :root { --bg:#0b0d10; --panel:#12151a; --ink:#e6e9ef; --muted:#a2a9b4; --accent:#4cc38a; --warn:#ffb703; --err:#ef476f; --line:#1d222b; }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji"}
+    a{color:var(--accent)}
+    .wrap{max-width:1100px;margin:0 auto;padding:24px}
+    header{display:flex;gap:18px;align-items:center;justify-content:space-between;margin-bottom:18px}
+    .brand{display:flex;gap:12px;align-items:center}
+    .logo{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#2dd4bf,#22c55e);display:grid;place-items:center;color:#0b0d10;font-weight:800}
+    h1{font-size:22px;margin:0}
+    .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
+    .grid{display:grid;grid-template-columns:1fr 340px;gap:16px}
+    textarea{width:100%;min-height:260px;resize:vertical;background:#0e1217;color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:12px;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+    .muted{color:var(--muted)}
+    .controls{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+    button,.btn{background:#1b2330;border:1px solid var(--line);color:var(--ink);padding:10px 12px;border-radius:10px;cursor:pointer}
+    button:hover{border-color:#2b3240}
+    .primary{background:var(--accent);color:#072713;border:0}
+    .danger{background:#2a1015;border:1px solid #47161e}
+    .stat{display:flex;gap:8px;align-items:center;padding:8px 10px;border:1px dashed var(--line);border-radius:10px}
+    .options{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .opt{background:#0e1217;border:1px solid var(--line);border-radius:10px;padding:10px}
+    .opt h4{margin:0 0 8px 0;font-size:14px}
+    .opt label{display:flex;align-items:center;gap:8px;margin:6px 0}
+    input[type="text"],input[type="number"],select{width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:#0b0f14;color:var(--ink)}
+    .two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .out{min-height:200px}
+    footer{margin:32px 0;color:var(--muted)}
+    .chip{font:12px ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;background:#0b0f14;border:1px solid var(--line);border-radius:999px;padding:2px 8px}
+    .hidden{display:none}
+    .note{font-size:13px;color:var(--muted)}
+  </style>
+  
+  <!-- JSON-LD FAQ for SEO -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {"@type":"Question","name":"What does UntrackURL do?",
+       "acceptedAnswer":{"@type":"Answer","text":"It removes tracking query parameters (like utm_source, utm_medium, gclid, fbclid) from URLs in bulk and returns clean links. All processing happens in your browser; no data leaves your device."}},
+      {"@type":"Question","name":"Is it private?",
+       "acceptedAnswer":{"@type":"Answer","text":"Yes. UntrackURL is a 100% client-side tool. We do not upload or store your pasted URLs."}},
+      {"@type":"Question","name":"Which parameters are removed?",
+       "acceptedAnswer":{"@type":"Answer","text":"By default we remove common trackers like utm_*, gclid, fbclid, dclid, mc_eid, msclkid, vero_conv, vero_id, _hsenc, _hsmi, sc_channel, igshid, ref_src, ref_url and many more. You can also configure an allowlist or a custom blocklist."}},
+      {"@type":"Question","name":"Can I keep some parameters?",
+       "acceptedAnswer":{"@type":"Answer","text":"Yes. Use the Allowlist to preserve parameters you need (e.g., coupon codes)."}},
+      {"@type":"Question","name":"Can I upload a file?",
+       "acceptedAnswer":{"@type":"Answer","text":"Yes. Drag-and-drop a .txt or .csv file with one URL per line or column. You can also download results as .txt or .csv."}}
+    ]
+  }
+  </script>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="logo" aria-hidden="true">U</div>
+        <div>
+          <h1>UntrackURL</h1>
+          <div class="muted">Bulk remove tracking parameters from URLs — fast, private, client‑side.</div>
+        </div>
+      </div>
+      <div class="muted">v1.0.0</div>
+    </header>
+
+    <div class="panel grid" id="app">
+      <section>
+        <label for="in" class="muted">Paste URLs (one per line). Drag & drop .txt/.csv also works.</label>
+        <textarea id="in" placeholder="https://example.com/?utm_source=twitter&gclid=123\nhttps://news.example.org/article?ref=fb&fbclid=abc123#section"></textarea>
+        <div class="controls">
+          <button class="primary" id="btnClean">Clean URLs</button>
+          <button id="btnCopy">Copy Output</button>
+          <button id="btnDownloadTxt">Download .txt</button>
+          <button id="btnDownloadCsv">Download .csv</button>
+          <button class="danger" id="btnClear">Clear</button>
+          <span class="stat" id="stats">0 in / 0 out • removed 0 params</span>
+        </div>
+        <h3>Output</h3>
+        <textarea id="out" class="out" readonly placeholder="Cleaned URLs will appear here…"></textarea>
+      </section>
+      <aside>
+        <div class="options">
+          <div class="opt">
+            <h4>Mode</h4>
+            <label><input type="radio" name="mode" value="default" checked> Remove known tracking params</label>
+            <label><input type="radio" name="mode" value="block"> Remove only these params (blocklist)</label>
+            <label><input type="radio" name="mode" value="allow"> Keep only these params (allowlist)</label>
+            <div class="two">
+              <div>
+                <div class="note">Blocklist (comma‑separated)</div>
+                <input type="text" id="blocklist" placeholder="utm_source,utm_medium,gclid,fbclid">
+              </div>
+              <div>
+                <div class="note">Allowlist (comma‑separated)</div>
+                <input type="text" id="allowlist" placeholder="coupon,code,ref">
+              </div>
+            </div>
+          </div>
+
+          <div class="opt">
+            <h4>Rules</h4>
+            <label><input type="checkbox" id="stripHash"> Remove URL hash (#fragment)</label>
+            <label><input type="checkbox" id="lowerKeys" checked> Lowercase parameter keys</label>
+            <label><input type="checkbox" id="sortParams"> Sort parameters (A→Z)</label>
+            <label><input type="checkbox" id="rmEmpty" checked> Remove empty parameters</label>
+            <label><input type="checkbox" id="forceHttps"> Force https (add scheme if missing)</label>
+          </div>
+
+          <div class="opt">
+            <h4>Advanced</h4>
+            <label><input type="checkbox" id="dedupe" checked> De‑duplicate exact URLs</label>
+            <label><input type="checkbox" id="trim" checked> Trim spaces and normalize</label>
+            <label><input type="checkbox" id="keepInvalid"> Keep invalid strings (don’t drop)</label>
+            <div class="note">Invalid entries are logged below output.</div>
+          </div>
+
+          <div class="opt">
+            <h4>Common tracking params</h4>
+            <div id="common" class="note"></div>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <footer>
+      <p class="muted">All cleaning happens in your browser. We don’t upload or store your data.</p>
+      <p class="note">© <span id="year"></span> UntrackURL. <a href="#" id="showPolicy">Privacy & Terms</a></p>
+    </footer>
+
+    <!-- Policy modal (inline to keep single-file) -->
+    <div id="policyModal" class="hidden" aria-hidden="true">
+      <div class="panel" style="max-width:800px;margin:20px auto;position:sticky;top:20px">
+        <h3>Privacy & Terms</h3>
+        <p>UntrackURL runs entirely in your browser (client‑side). We do not transmit your input URLs to any server. If you enable ads or analytics in future, this notice should be updated accordingly.</p>
+        <p>THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND. Use at your own risk.</p>
+        <p><button id="closePolicy">Close</button></p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- Known tracking parameters (lowercase keys) ---
+    const KNOWN_TRACKERS = [
+      // UTM & ad ids
+      'utm_source','utm_medium','utm_campaign','utm_term','utm_content','utm_name','utm_reader','utm_id','utm_channel',
+      'gclid','dclid','gbraid','wbraid','msclkid','yclid',
+      // social & fb
+      'fbclid','igshid','mc_eid','mc_cid','vero_conv','vero_id',
+      // marketing suites
+      '_hsenc','_hsmi','hsCtaTracking'.toLowerCase(),'sc_channel','sc_campaign','sc_content','sc_medium','sc_source','mkt_tok','spm',
+      // misc refs
+      'ref','ref_src','ref_url','affid','aff','aff_id','campaign','trk','mcref','rb_clickid','si','sr_share','share','ncid',
+      // email & others
+      'cmp','cmpid','emcid','emc','elqTrackId'.toLowerCase(),'elq_mid'.toLowerCase(),'s_cid','icid','cid','mbid'
+    ];
+
+    // UI bindings
+    const $ = sel => document.querySelector(sel);
+    const $$ = sel => Array.from(document.querySelectorAll(sel));
+
+    const els = {
+      input:  $('#in'),
+      output: $('#out'),
+      stats:  $('#stats'),
+      block:  $('#blocklist'),
+      allow:  $('#allowlist'),
+      stripHash: $('#stripHash'),
+      lowerKeys: $('#lowerKeys'),
+      sortParams: $('#sortParams'),
+      rmEmpty: $('#rmEmpty'),
+      forceHttps: $('#forceHttps'),
+      dedupe: $('#dedupe'),
+      trim: $('#trim'),
+      keepInvalid: $('#keepInvalid'),
+      common: $('#common'),
+      year: $('#year'),
+      modal: $('#policyModal'),
+      showPolicy: $('#showPolicy'),
+      closePolicy: $('#closePolicy')
+    };
+
+    els.year.textContent = new Date().getFullYear();
+    els.common.textContent = KNOWN_TRACKERS.join(', ');
+
+    // Drag & drop support
+    const app = $('#app');
+    app.addEventListener('dragover', e => { e.preventDefault(); app.style.outline = '2px dashed #2b3240'; });
+    app.addEventListener('dragleave', e => { app.style.outline = 'none'; });
+    app.addEventListener('drop', async e => {
+      e.preventDefault(); app.style.outline = 'none';
+      const file = e.dataTransfer.files?.[0]; if(!file) return;
+      const text = await file.text();
+      // Naive CSV detection; split on newlines and commas if many commas present
+      const byLine = text.split(/\r?\n/);
+      const heavyComma = (text.match(/,/g)||[]).length > byLine.length;
+      let urls = heavyComma ? text.split(/[,\r?\n]+/) : byLine;
+      urls = urls.map(s => s.trim()).filter(Boolean);
+      els.input.value = (els.input.value + '\n' + urls.join('\n')).trim();
+      updateCounts();
+    });
+
+    // Modal
+    els.showPolicy.addEventListener('click', (e)=>{ e.preventDefault(); els.modal.classList.remove('hidden'); });
+    els.closePolicy.addEventListener('click', ()=> els.modal.classList.add('hidden'));
+
+    // Helpers
+    function parseList(val){
+      return val.split(',').map(s=>s.trim().toLowerCase()).filter(Boolean);
+    }
+
+    function normalizeUrl(str){
+      let s = str; if(els.trim.checked) s = s.trim();
+      if(!s) return '';
+      // add scheme if missing and force https if enabled
+      if(!/^https?:\/\//i.test(s)){
+        if(els.forceHttps.checked) s = 'https://' + s; else s = 'http://' + s;
+      }
+      return s;
+    }
+
+    function cleanOne(raw, opts){
+      const log = { raw, valid:true, removed:0 };
+      const s = normalizeUrl(raw);
+      try{
+        const u = new URL(s);
+        // Work on a clone of search params
+        const old = new URLSearchParams(u.search);
+        const fresh = new URLSearchParams();
+        const keys = [];
+        old.forEach((v,k)=>{ keys.push(k); });
+
+        const block = opts.mode==='block' ? new Set(opts.block) : null;
+        const allow = opts.mode==='allow' ? new Set(opts.allow) : null;
+
+        keys.forEach(k=>{
+          const key = els.lowerKeys.checked ? k.toLowerCase() : k;
+          const val = old.get(k);
+          if(els.rmEmpty.checked && (val==='' || val===null)) return; // drop empty
+
+          let drop = false;
+          if(opts.mode==='default'){
+            drop = KNOWN_TRACKERS.includes(key);
+          } else if(opts.mode==='block'){
+            drop = block.has(key);
+          } else if(opts.mode==='allow'){
+            drop = !allow.has(key);
+          }
+          if(drop){ log.removed++; return; }
+          // keep param
+          const targetKey = els.lowerKeys.checked ? key : k;
+          fresh.append(targetKey, val);
+        });
+
+        // Replace search
+        // Optionally sort params
+        let outParams = fresh;
+        if(els.sortParams.checked){
+          const tmp = new URLSearchParams();
+          Array.from(fresh.keys()).sort().forEach(k=>{
+            const vals = fresh.getAll(k);
+            vals.forEach(v=> tmp.append(k,v));
+          });
+          outParams = tmp;
+        }
+        u.search = outParams.toString() ? ('?' + outParams.toString()) : '';
+        if(els.stripHash.checked) u.hash = '';
+        return { url: u.toString(), removed: log.removed, valid:true };
+      }catch(e){
+        log.valid=false; return { url: raw, removed:0, valid:false };
+      }
+    }
+
+    function splitInput(text){
+      // Split on newlines or spaces; keep URLs intact if they contain spaces within angle brackets etc.
+      return text.split(/\r?\n|\s+/).map(s=>s.trim()).filter(Boolean);
+    }
+
+    function dedupe(arr){
+      return Array.from(new Set(arr));
+    }
+
+    function updateCounts(){
+      const inputList = splitInput(els.input.value);
+      const outputList = splitInput(els.output.value);
+      els.stats.textContent = `${inputList.length} in / ${outputList.length} out • removed ${window.__removedCount||0} params`;
+    }
+
+    function run(){
+      const lines = splitInput(els.input.value);
+      const mode = $$('input[name="mode"]').find(r=>r.checked)?.value || 'default';
+      const opts = { mode, block: parseList(els.block.value), allow: parseList(els.allow.value) };
+      const cleaned = [];
+      const invalid = [];
+      let removedTotal = 0;
+      for(const raw of lines){
+        const r = cleanOne(raw, opts);
+        if(!r.valid){ if(els.keepInvalid.checked) cleaned.push(raw); else invalid.push(raw); continue; }
+        cleaned.push(r.url); removedTotal += r.removed;
+      }
+      const final = els.dedupe.checked ? dedupe(cleaned) : cleaned;
+      els.output.value = final.join('\n');
+      window.__removedCount = removedTotal;
+      updateCounts();
+      if(invalid.length){
+        console.warn('Invalid entries dropped:', invalid);
+      }
+    }
+
+    // Wire buttons
+    $('#btnClean').addEventListener('click', run);
+    $('#btnCopy').addEventListener('click', async ()=>{
+      await navigator.clipboard.writeText(els.output.value||'');
+      $('#btnCopy').textContent = 'Copied';
+      setTimeout(()=> $('#btnCopy').textContent='Copy Output', 1200);
+    });
+
+    function download(name, content, type='text/plain'){
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([content], {type}));
+      a.download = name; a.click();
+      setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
+    }
+
+    $('#btnDownloadTxt').addEventListener('click', ()=>{
+      download('untrackurl-clean.txt', (els.output.value||'') + '\n');
+    });
+    $('#btnDownloadCsv').addEventListener('click', ()=>{
+      const rows = (els.output.value||'').split(/\r?\n/).filter(Boolean).map(u=>`"${u.replace(/"/g,'""')}"`);
+      download('untrackurl-clean.csv', rows.join('\n'), 'text/csv');
+    });
+    $('#btnClear').addEventListener('click', ()=>{ els.input.value=''; els.output.value=''; window.__removedCount=0; updateCounts(); });
+
+    // Live counts
+    els.input.addEventListener('input', updateCounts);
+
+    // Defaults
+    updateCounts();
+  </script>
+
+  <!-- Ad placeholder (enable after AdSense approval)
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXX" crossorigin="anonymous"></script>
+  <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-XXXX" data-ad-slot="YYYY" data-ad-format="auto" data-full-width-responsive="true"></ins>
+  <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  -->
+</body>
+</html>
